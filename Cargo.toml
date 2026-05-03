@@ -1,0 +1,11 @@
+[package]
+name = "hpre"
+version = "4.0.0"
+edition = "2024"
+description = "Simple but handy Haskell preprocessor."
+license = "MIT"
+
+[dependencies]
+
+[dev-dependencies]
+pretty_assertions = "1"

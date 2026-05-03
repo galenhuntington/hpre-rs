@@ -1,0 +1,33 @@
+str1 :: String
+str1{-#COLUMN 5#-}= "test1"
+
+str2 :: String
+str2 = str3 where
+   str3 :: String
+   {- comment -}
+   str3{-#COLUMN 7#-}= "test2"
+
+nestéd :: Int -> Bool
+nestéd{-#COLUMN 5#-}0 = α where
+   α :: Bool
+-- comment
+   α{-#COLUMN 7#-}= True
+{-
+   comment
+-}
+nestéd{-#COLUMN 5#-}_ = β where
+   β :: Bool
+   β = False
+
+column :: Int
+column{-#COLUMN 4#-}= a where a :: Int
+             a = 4
+
+blankLine :: ()
+
+blankLine{-#COLUMN 5#-}= ()
+
+spacesOnlyLine :: ()
+          
+spacesOnlyLine{-#COLUMN 5#-}= ()
+
