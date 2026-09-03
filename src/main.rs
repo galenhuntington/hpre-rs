@@ -19,7 +19,9 @@ fn main() {
     match args.len() {
         1 => {
             let mut input = String::new();
-            io::stdin().read_to_string(&mut input).unwrap();
+            io::stdin().read_to_string(&mut input).unwrap_or_else(|e| {
+                abort(&format!("Cannot read stdin: {}", e));
+            });
             print!("{}", run_process(&input));
         }
         2 if args[1] == "--version" => {
