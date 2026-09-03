@@ -48,7 +48,7 @@ conflict with either notation.
 ##  Trailing commas and the like
 
 _A GHC extension `ExtraCommas` has been proposed that would replace
-some of these features, but it has been stalled for a while._
+some of these features, but it has been stalled for years._
 
 That a comma is not allowed after the last item in a comma-separated
 list is a recurring nuisance.  It is easy to fail to attend to
@@ -77,11 +77,10 @@ The Haskell community’s answer to this has been to adopt
 
 The idea being that you can add `, itemFour` easily.
 
-However, this is not really satisfactory.  For one, I personally
-find it unsightly; commas were meant to sit comfortably after a word.
-Nevertheless, there is an argument that code is easier to scan with
-delimiters at the start of lines, and the community has largely
-settled on this style, so I have been slowly adopting it.
+However, this is not really a solution.  For one, it is arguably
+unsightly; commas were meant to sit comfortably after a word.  But
+there is an argument that code is easier to scan with delimiters at the
+start of lines, and the community has largely settled on this style.
 
 But the more important point is that it doesn’t fix the problem.
 Instead of the last item being exceptional, now the first is.  Perhaps
@@ -90,10 +89,9 @@ one might want to move `itemOne` down, or add before it, or remove it.
 
 Many other languages sensibly allow a _trailing comma_ in such lists,
 after the last item.  Java, Python, Perl, Ruby, and modern JavaScript
-all do.  In Rust it is the recommended style.  Haskell even allows
-it in import and export lists.  It may indeed be better design for
-the comma to be a (perhaps optionally omitted) terminator rather than
-a separator.
+all do.  In Rust it is the recommended style.  Haskell even allows it
+in import and export lists.  It may be better design for the comma to
+be a (perhaps optionally omitted) terminator rather than a separator.
 
 `hpre` thus supports this for items split across lines, which is the
 primary use case.  You can write
@@ -115,10 +113,9 @@ or
       } deriving (Eq, Show)
 ```
 
-and `hpre` will remove the final comma before sending to GHC.
-Specifically, it looks for a comma at the end of one line (not
-counting a `--` comment), followed by a closing delimiter at the
-start of the next.
+and `hpre` will remove the final comma.  Specifically, it looks for a
+comma at the end of one line (not counting a `--` comment), followed
+by a closing delimiter at the start of the next.
 
 This could in principle conflict with the tuple section extension,
 where `(True,)` is a function `a -> (Bool, a)`, but it would be
@@ -167,8 +164,8 @@ Eight spaces is a lot, and most prefer an indentation of at most four.
 So, code with tabs will be mis-aligned by the Haskell parser, which
 is relevant with significant whitespace.
 
-`hpre` has a (hardcoded) setting `tabWidth`, and it expands all tabs in
-the source to use that as a tabstop before passing it along to GHC.
+`hpre` has a (hardcoded) setting `TAB_WIDTH`, and it expands all tabs
+in the source to use that as a tabstop before passing it along to GHC.
 Thus, you can continue to use your favorite tabstop, and, if you change
 your mind about it (an advantage of tabs), you can change it in `hpre`.
 
@@ -205,8 +202,8 @@ nicer solution, where the `otherwise` is optional.  Imagine this:
          |       = n * fac (n-1)
 ```
 
-To me this is much more pleasant and natural.  (In Clean the second
-`|` is actually omitted, but I don’t follow that.)
+To me this looks better and more natural.  (In Clean the second `|`
+is actually omitted, but I don’t follow that.)
 
 And the idea fits nicely with existing syntax.  There is a “pattern
 guards” extension, standard in Haskell2010, which allows multiple
@@ -387,19 +384,18 @@ up names:
 8.10 that moves `qualified` after the module name, which somewhat
 obviates this.)
 
-Meanwhile, qualification seems an unnecessary feature.  It is rare
-that one wants to use `as` _un_&#xfeff;qualified.  No other language I
-know of, including those Haskell-inspired, has any such keyword.
+Meanwhile, qualification seems an unnecessary specifier.  It is
+rare that one wants to use `as` _un_⁠qualified.  No other language
+I know of, including those Haskell-inspired, has any such keyword.
 For instance, in PureScript `as` in an import always means qualified.
-
-Haskell singularly optimizes its syntax for the least common case.
+Haskell optimizes its syntax for the least common case.
 
 `hpre` extends and alters the import syntax with the following
 two rules:
 
 1.  A module may be imported multiple times in one statement, by
-separating specifiers with commas.  For instance `import Foo as A,
-as B` will import the module into both namespaces.
+separating clauses with commas.  For instance `import Foo as A, as B`
+will import the module into both namespaces.
 
 2.  An import with `as` is always qualified.
 
@@ -432,8 +428,7 @@ import Control.Exception, as Exc
 That is, this will import all symbols from the module both unqualified
 and with `Exc.`.  (A _trailing_ comma, however, is ignored.)
 
-If an import is explicitly `qualified`, a warning is output, and it
-is left unchanged.  I may eventually make this an error.
+An import being explicitly marked `qualified` is now an error.
 
 In Haskell, modules can be re-exported by adding `module X` to the
 export list.  This exports symbols only if they are in scope _both_
@@ -465,10 +460,6 @@ meaning of valid Haskell programs, since `as` imports all become
 qualified.  For this reason, it is off by default, and is enabled by
 putting `--+` on a line by itself, which causes import statements to
 be processed from then on.
-
-While having the feature on all the time is worth considering in say
-a (breaking) 3.0 release, my inclination is to keep this buffer so
-`hpre` is always “safe” to use.
 
 
 ##  Limitations and future work
@@ -520,6 +511,6 @@ or add this line to individual Haskell files:
 {-# OPTIONS_GHC -F -pgmF hpre #-}
 ```
 
-Make sure that wherever `hpre` is installed (e.g., `~/.cabal/bin/`),
-your build system can find it, or put a full path after `-pgmF`.
+Make sure that wherever `hpre` is installed where your build system
+can find it, or put a full path after `-pgmF`.
 
