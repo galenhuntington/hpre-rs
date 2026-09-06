@@ -399,6 +399,12 @@ will import the module into both namespaces.
 
 2.  An import with `as` is always qualified.
 
+Unlike all other `hpre` features, multiplex imports can change the
+meaning of valid Haskell programs, since `as` imports all become
+qualified.  For this reason, it is off by default, and is enabled by
+putting `--+` on a line by itself, which causes import statements to
+be processed from then on.
+
 Thus, using `hpre`, the above two lines can be written as simply
 
 ```haskell
@@ -426,9 +432,26 @@ import Control.Exception, as Exc
 ```
 
 That is, this will import all symbols from the module both unqualified
-and with `Exc.`.  (A _trailing_ comma, however, is ignored.)
+and with `Exc.`.  A _trailing_ comma, however, is ignored rather than
+treated as final, empty clause.  Because an empty specifier may look
+odd, this form is an alternative:
 
-An import being explicitly marked `qualified` is now an error.
+```haskell
+import Control.Exception (..), as Exc
+```
+
+More generally, `(..)` can be used to mean import everything exported
+by the module.  Other possible usages:
+
+```haskell
+import Data.Bool (..)
+import Data.Maybe as M (..)
+```
+
+`hpre` simply removes the `(..)`.  This is a newer feature and may
+become preferred in cases of multiple specifiers with one empty.
+
+An import being explicitly marked `qualified` is an error.
 
 In Haskell, modules can be re-exported by adding `module X` to the
 export list.  This exports symbols only if they are in scope _both_
@@ -451,15 +474,7 @@ and consistently by adding (in this example) `, as Export`:
    import Data.Text (Text, pack, unpack), as T, as Export
 ```
 
-An extension I’m considering is having `(..)` represent the
-whole module, as in `import Foo (..)`, to avoid the odd notation of
-separating off an empty specifier with a comma.
-
-Unlike all other `hpre` features, multiplex imports can change the
-meaning of valid Haskell programs, since `as` imports all become
-qualified.  For this reason, it is off by default, and is enabled by
-putting `--+` on a line by itself, which causes import statements to
-be processed from then on.
+An `(..)` can be inserted in the second case as above.
 
 
 ##  Limitations and future work

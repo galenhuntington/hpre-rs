@@ -7,11 +7,15 @@ import Data.Char (generalCategory)
 import qualified Data.String as String;import qualified Data.String as S
 import Data.Ord;import qualified Data.Ord as Ord
 import qualified Control.Concurrent
-   as Cur;import qualified Control.Concurrent as C;import qualified Control.Concurrent
+   as Cur (forkIO);import qualified Control.Concurrent as C;import qualified Control.Concurrent
    as Cu
 import Data.List;import qualified Data.List
 
    as List
+import System.IO 
+import Data.Bool ;import qualified Data.Bool as Bool
+import qualified Data.Bool as Bool;import Data.Bool 
+import qualified Data.Bool as Bool ;import Data.Bool
 import Data.Map;import qualified Data.Map as M
 import "base" Control.Monad
 

@@ -203,6 +203,7 @@ fn parse_import_name(blk: &str) -> (&str, &str) {
 fn render_import(acc: &str, name: &str) -> String {
     let trimmed = acc.trim_start();
     let qualified = if trimmed.starts_with("as") { "qualified " } else { "" };
+    let acc = acc.strip_suffix("(..)").unwrap_or(acc);
     format!("import {}{}{}", qualified, name, acc)
 }
 
