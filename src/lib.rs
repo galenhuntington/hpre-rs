@@ -200,22 +200,22 @@ fn parse_import_name(blk: &str) -> (&str, &str) {
     }
 }
 
-fn render_import(acc: &str, name: &str) -> String {
+fn render_import(acc: &str, name: &str, qualify: bool) -> String {
     let trimmed = acc.trim_start();
-    let qualified = if trimmed.starts_with("as") { "qualified " } else { "" };
+    let qualified = if qualify && trimmed.starts_with("as") { "qualified " } else { "" };
     let acc = acc.strip_suffix("(..)").unwrap_or(acc);
     format!("import {}{}{}", qualified, name, acc)
 }
 
 /// Split on top-level commas, render as imports joined with `;`.
 /// Trailing comma is dropped.
-fn do_import(blk: &str) -> String {
+fn do_import(blk: &str, qualify: bool) -> String {
     let (name, nx) = parse_import_name(blk);
     let mut list = vec![];
     let mut segment = String::new();
     let mut depth: u32 = 0;
     macro_rules! flush {() => {
-        list.push(render_import(&segment, name));
+        list.push(render_import(&segment, name, qualify));
         segment.clear();
     }}
     for c in nx.chars() {
@@ -234,19 +234,18 @@ fn do_import(blk: &str) -> String {
 
 // After this "lines" may not be individual lines but blocks.
 // However, line numbers should still be preserved.
-fn imports(lines: &mut Vec<String>) -> Result<(), String> {
-    let Some(pos) = lines.iter().position(|l| l == IMPORT_MARKER) else {
-        return Ok(())
-    };
-    let mut it = lines.drain(pos..).peekable();
-    let mut blocks = Vec::with_capacity(it.len());
+fn imports(lines: Vec<String>) -> Result<Vec<String>, String> {
+    let mut blocks = Vec::with_capacity(lines.len());
+    let mut it = lines.into_iter().peekable();
+    let mut qualify = false;
     while let Some(line) = it.next() {
         blocks.push(
             if line == IMPORT_MARKER {
+                qualify = true;
                 String::new()
             } else if let Some(after) = line.strip_prefix("import ") {
                 let after = after.trim_start();
-                if after.starts_with("qualified") {
+                if qualify && after.starts_with("qualified") {
                     return Err("'qualified' in multiplex import.".to_string());
                 }
                 let mut blk = strip_end_fluff(after).to_owned();
@@ -256,15 +255,14 @@ fn imports(lines: &mut Vec<String>) -> Result<(), String> {
                     blk.push('\n');
                     blk.push_str(strip_end_fluff(&l));
                 }
-                do_import(&blk)
+                do_import(&blk, qualify)
             } else {
                 line
             }
         );
     }
     drop(it);
-    lines.extend(blocks);
-    Ok(())
+    Ok(blocks)
 }
 
 pub fn process(input: &str) -> Result<String, String> {
@@ -274,8 +272,8 @@ pub fn process(input: &str) -> Result<String, String> {
     commas_r(&mut lines);
     commas_l(&mut lines);
     data_bars_l(&mut lines);
-    imports(&mut lines)?;
-    Ok(lines.join("\n") + "\n")
+    let blocks = imports(lines)?;
+    Ok(blocks.join("\n") + "\n")
 }
 
 #[cfg(test)]

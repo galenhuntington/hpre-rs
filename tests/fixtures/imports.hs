@@ -1,5 +1,6 @@
 import Data.List as List
 import qualified Control.Monad as Monad
+import Data.String as Str, qualified as String
 
 --+
 import Data.Maybe

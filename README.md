@@ -399,13 +399,12 @@ will import the module into both namespaces.
 
 2.  An import with `as` is always qualified.
 
-Unlike all other `hpre` features, multiplex imports can change the
-meaning of valid Haskell programs, since `as` imports all become
-qualified.  For this reason, it is off by default, and is enabled by
-putting `--+` on a line by itself, which causes import statements to
-be processed from then on.
+Unlike all other `hpre` features, rule 2 changes the meaning of
+valid Haskell programs.  For this reason, it is off by default,
+and is enabled by putting `--+` on a line by itself, which causes
+imports with `as` from then on to be qualified.
 
-Thus, using `hpre`, the above two lines can be written as simply
+Thus, the two lines at the start can be written as simply
 
 ```haskell
    import Data.Map.Strict (Map), as Map
@@ -428,7 +427,7 @@ Examples:
 The “unqualified as” import can be emulated as follows:
 
 ```haskell
-import Control.Exception, as Exc
+   import Control.Exception, as Exc
 ```
 
 That is, this will import all symbols from the module both unqualified
@@ -437,15 +436,15 @@ treated as final, empty clause.  Because an empty specifier may look
 odd, this form is an alternative:
 
 ```haskell
-import Control.Exception (..), as Exc
+   import Control.Exception (..), as Exc
 ```
 
 More generally, `(..)` can be used to mean import everything exported
 by the module.  Other possible usages:
 
 ```haskell
-import Data.Bool (..)
-import Data.Maybe as M (..)
+   import Data.Bool (..)
+   import Data.Maybe as M (..)
 ```
 
 `hpre` simply removes the `(..)`.  This is a newer feature and may
@@ -455,7 +454,7 @@ An import being explicitly marked `qualified` is an error.
 
 In Haskell, modules can be re-exported by adding `module X` to the
 export list.  This exports symbols only if they are in scope _both_
-unqualified and qualified as _X_.  A common idiom is to use one module
+qualified as `X` and unqualified.  A common idiom is to use one module
 name for all exported symbols, e.g.,
 
 ```haskell
@@ -476,6 +475,22 @@ and consistently by adding (in this example) `, as Export`:
 
 An `(..)` can be inserted in the second case as above.
 
+###  Without auto-qualification
+
+Multiplex imports can be used without automatic qualification
+by omitting a `--+` line.  However, for this to be useful, the
+`ImportQualifiedPost` extension should be utilized, so that `qualified`
+can be associated with the individual import clause instead of the
+entire statement:
+
+```haskell
+   import Control.Monad (guard), qualified as Monad
+```
+
+Note that, by contrast, when auto-qualification is on, `hpre` generates
+imports with `qualified` preposed.  A future feature might support
+postposition.
+
 
 ##  Limitations and future work
 
@@ -486,9 +501,9 @@ are used with ditto expansion—and I almost never encounter problems,
 but it can happen.  As an example,
 
 ```haskell
-     bad a b | b = 1
-             |   = f a where f 0 = 5
-                             f x = x + 1
+   bad a b | b = 1
+           |   = f a where f 0 = 5
+                           f x = x + 1
 ```
 
 will fail to parse because the `f`s will not align when `True`
@@ -511,16 +526,16 @@ of the existing features may continue to be refined.
 
 ##  Installation and use
 
-`hpre` can be installed by running `cabal install` or `stack install`
-from its directory.  Alternatively, you can build the binary directly:
+`hpre` can be installed with Cargo.  Here’s an example of how you
+might install it on your system:
 
-```bash
-ghc --make -O hpre.hs
+```
+cargo install --git https://github.com/galenhuntington/hpre-rs --root ~/.local --locked
 ```
 
-To use, add the command line options `-F -pgmF hpre` to `ghc` (or
-`runghc`, `ghci`, `runhaskell`, `ghc-options` in `cabal`, etc.),
-or add this line to individual Haskell files:
+To use in your Haskell program, add the command line options
+`-F -pgmF hpre` to `ghc` (or `runghc`, `ghci`, `runhaskell`, `ghc-options`
+in `cabal`, etc.), or add this line to individual Haskell files:
 
 ```haskell
 {-# OPTIONS_GHC -F -pgmF hpre #-}
